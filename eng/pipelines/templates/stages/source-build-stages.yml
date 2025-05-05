@@ -14,6 +14,16 @@ parameters:
   type: boolean
   default: true
 
+# True when build is running from dotnet/dotnet directly
+- name: isBuiltFromVmr
+  type: boolean
+  default: true
+
+# Branch of the VMR to use (to push to for internal builds)
+- name: vmrBranch
+  type: string
+  default: $(Build.SourceBranch)
+
 stages:
 - template: source-build-and-validate.yml
   parameters:
@@ -34,6 +44,8 @@ stages:
       
       - buildNameFormat: '{0}_Online_MsftSdk'
         distro: centos
+        isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+        vmrBranch: ${{ variables.VmrBranch }}
         targetArchitecture: x64
         buildFromArchive: false            # 🚫
         enablePoison: false                # 🚫
@@ -43,6 +55,8 @@ stages:
       
       - buildNameFormat: '{0}_Offline_CurrentSourceBuiltSdk'
         distro: centos
+        isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+        vmrBranch: ${{ variables.VmrBranch }}
         targetArchitecture: x64
         buildFromArchive: false            # 🚫
         enablePoison: false                # 🚫
@@ -56,6 +70,8 @@ stages:
       
         - buildNameFormat: '{0}_Offline_MsftSdk'
           distro: ubuntu
+         isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+         vmrBranch: ${{ variables.VmrBranch }}
           targetArchitecture: x64
           buildFromArchive: false            # 🚫
           enablePoison: false                # 🚫
@@ -66,6 +82,8 @@ stages:
 
         - buildNameFormat: '{0}_Offline_PreviousSourceBuiltSdk'
           distro: centos
+          isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+          vmrBranch: ${{ variables.VmrBranch }}
           targetArchitecture: x64
           buildFromArchive: false            # 🚫
           enablePoison: true                 # ✅
@@ -78,6 +96,8 @@ stages:
 
           - buildNameFormat: '{0}_Offline_MsftSdk'
             distro: almalinux
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: false            # 🚫
             enablePoison: false                # 🚫
@@ -87,6 +107,8 @@ stages:
 
           - buildNameFormat: '{0}_Offline_MsftSdk'
             distro: alpine
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: false            # 🚫
             enablePoison: false                # 🚫
@@ -96,6 +118,8 @@ stages:
 
           - buildNameFormat: '{0}_Offline_MsftSdk'
             distro: centos
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: true             # ✅
             enablePoison: false                # 🚫
@@ -105,6 +129,8 @@ stages:
 
           - buildNameFormat: '{0}_Online_PreviousSourceBuiltSdk'
             distro: centos
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: false            # 🚫
             enablePoison: false                # 🚫
@@ -114,6 +140,8 @@ stages:
 
           - buildNameFormat: '{0}_Mono_Offline_MsftSdk'
             distro: centos
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: true             # ✅
             enablePoison: false                # 🚫
@@ -123,6 +151,8 @@ stages:
 
           - buildNameFormat: '{0}_Offline_MsftSdk'
             distro: fedora
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: true             # ✅
             enablePoison: false                # 🚫
@@ -132,6 +162,8 @@ stages:
 
           - buildNameFormat: '{0}Arm64_Offline_MsftSdk'
             distro: ubuntu
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: arm64
             buildFromArchive: false            # 🚫
             enablePoison: false                # 🚫
@@ -141,6 +173,8 @@ stages:
 
           - buildNameFormat: '{0}_Offline_CurrentSourceBuiltSdk'
             distro: fedora
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: false            # 🚫
             enablePoison: false                # 🚫
@@ -151,6 +185,8 @@ stages:
 
           - buildNameFormat: '{0}_Mono_Offline_CurrentSourceBuiltSdk'
             distro: centos
+            isBuiltFromVmr: ${{ parameters.isBuiltFromVmr }}
+            vmrBranch: ${{ variables.VmrBranch }}
             targetArchitecture: x64
             buildFromArchive: true             # ✅
             enablePoison: false                # 🚫
