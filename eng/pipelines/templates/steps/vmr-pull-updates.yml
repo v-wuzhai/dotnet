@@ -8,7 +8,7 @@ parameters:
   type: string
 
 - name: targetRef
-  displayName: Target revision in dotnet/sdk to synchronize
+  displayName: Target revision in dotnet/<repo> to synchronize
   type: string
   default: $(Build.SourceVersion)
 
@@ -24,16 +24,16 @@ parameters:
 
 steps:
 - checkout: self
-  displayName: Clone dotnet/sdk
-  path: sdk
+  displayName: Clone dotnet/<repo>
+  path: repo
 
 # This step is needed so that when we get a detached HEAD / shallow clone,
-# we still pull the commit into the temporary sdk clone to use it during the sync.
+# we still pull the commit into the temporary repo clone to use it during the sync.
 - script: |
-    git branch sdk-head
+    git branch repo-head
     git rev-parse HEAD
   displayName: Label PR commit
-  workingDirectory: $(Agent.BuildDirectory)/sdk
+  workingDirectory: $(Agent.BuildDirectory)/repo
 
 - script: |
     git checkout -B ${{ parameters.vmrBranch }}
@@ -48,7 +48,7 @@ steps:
   workingDirectory: ${{ parameters.vmrPath }}
 
 - script: |
-    ./eng/common/vmr-sync.sh                         \
+    ${{ parameters.vmrPath }}/eng/vmr-sync.sh                         \
       --vmr ${{ parameters.vmrPath }}         \
       --tmp $(Agent.TempDirectory)            \
       --azdev-pat '$(dn-bot-all-orgs-code-r)' \
@@ -62,7 +62,7 @@ steps:
     fi
   displayName: Sync sdk into VMR (Unix)
   condition: ne(variables['Agent.OS'], 'Windows_NT')
-  workingDirectory: $(Agent.BuildDirectory)/sdk
+  workingDirectory: $(Agent.BuildDirectory)/repo
 
 - script: |
     git config --global diff.astextplain.textconv echo
@@ -71,7 +71,7 @@ steps:
   condition: eq(variables['Agent.OS'], 'Windows_NT')
 
 - powershell: |
-    ./eng/common/vmr-sync.ps1                      `
+    ${{ parameters.vmrPath }}/eng/vmr-sync.ps1                      `
       -vmr ${{ parameters.vmrPath }}        `
       -tmp $(Agent.TempDirectory)           `
       -azdevPat '$(dn-bot-all-orgs-code-r)' `
@@ -85,7 +85,7 @@ steps:
     }
   displayName: Sync sdk into VMR (Windows)
   condition: eq(variables['Agent.OS'], 'Windows_NT')
-  workingDirectory: $(Agent.BuildDirectory)/sdk
+  workingDirectory: $(Agent.BuildDirectory)/repo
 
 - ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
   - task: CopyFiles@2
@@ -104,7 +104,7 @@ steps:
 - ${{ each assetName in parameters.additionalSyncs }}:
   # The vmr-sync script ends up staging files in the local VMR so we have to commit those
   - script:
-      git commit --allow-empty -am "Forward-flow dotnet/sdk"
+      git commit --allow-empty -am "Forward-flow dotnet/<repo>"
     displayName: Commit local VMR changes
     workingDirectory: ${{ parameters.vmrPath }}
 
@@ -133,7 +133,7 @@ steps:
       git checkout $commit
       git branch "sync/$commit"
 
-      $(Agent.BuildDirectory)/sdk/eng/common/vmr-sync.sh                         \
+      $(Agent.BuildDirectory)/vmr/eng/vmr-sync.sh                         \
         --vmr ${{ parameters.vmrPath }}         \
         --tmp $(Agent.TempDirectory)            \
         --azdev-pat '$(dn-bot-all-orgs-code-r)' \
@@ -147,7 +147,7 @@ steps:
       fi
     displayName: Sync ${{ assetName }} into (Unix)
     condition: ne(variables['Agent.OS'], 'Windows_NT')
-    workingDirectory: $(Agent.BuildDirectory)/sdk
+    workingDirectory: $(Agent.BuildDirectory)/repo
 
   - powershell: |
       $ErrorActionPreference = 'Stop'
@@ -176,7 +176,7 @@ steps:
       git checkout $commit
       git branch "sync/$commit"
 
-      $(Agent.BuildDirectory)\sdk\eng\common\vmr-sync.ps1 `
+      $(Agent.BuildDirectory)\vmr\eng\vmr-sync.ps1 `
         -vmr ${{ parameters.vmrPath }}             `
         -tmp $(Agent.TempDirectory)                `
         -azdevPat '$(dn-bot-all-orgs-code-r)'      `
@@ -190,4 +190,4 @@ steps:
       }
     displayName: Sync ${{ assetName }} into (Windows)
     condition: eq(variables['Agent.OS'], 'Windows_NT')
-    workingDirectory: $(Agent.BuildDirectory)/sdk
+    workingDirectory: $(Agent.BuildDirectory)/repo
